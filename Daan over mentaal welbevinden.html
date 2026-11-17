@@ -1,0 +1,667 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Daan over mentaal welbevinden</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=DM+Sans:opsz,wght@9..40,400..700&display=swap">
+<style>
+/* Indeling: links het podium met de persona, rechts een paneel dat per stap van scherm wisselt. */
+:root {
+  --font-display: 'Bricolage Grotesque', 'Trebuchet MS', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --bg: #EAF1EF;
+  --stage: #D5E6E1;
+  --halo: #BFD9D2;
+  --surface: #F7FAF9;
+  --ink: #11302E;
+  --ink-soft: #42615D;
+  --line: #B3CBC6;
+  --accent: #C4501B;
+  --on-accent: #FFFFFF;
+  --accent-tint: #F6DDD0;
+  --tunic: #6A5A9E;
+  --tunic-light: #A596D0;
+  --skin: #E2B08A;
+  --skin-shade: #CF9972;
+  --hair: #3B2F2B;
+  --hair-shade: #241B18;
+  --eye: #1B2828;
+  --mouth: #7A2F2F;
+  --glasses: #3A2A26;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1B1A;
+    --stage: #16302E;
+    --halo: #21423F;
+    --surface: #142726;
+    --ink: #E5F1EE;
+    --ink-soft: #A3BDB8;
+    --line: #2B4744;
+    --accent: #FF9A66;
+    --on-accent: #2A1206;
+    --accent-tint: #3A2418;
+    --tunic: #7C6BB5;
+    --tunic-light: #B7A9DE;
+    --hair: #6B5A52;
+    --hair-shade: #3A2E2A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1B1A;
+  --stage: #16302E;
+  --halo: #21423F;
+  --surface: #142726;
+  --ink: #E5F1EE;
+  --ink-soft: #A3BDB8;
+  --line: #2B4744;
+  --accent: #FF9A66;
+  --on-accent: #2A1206;
+  --accent-tint: #3A2418;
+  --tunic: #7C6BB5;
+  --tunic-light: #B7A9DE;
+  --hair: #6B5A52;
+  --hair-shade: #3A2E2A;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.55;
+  padding-block: 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2 { font-family: var(--font-display); line-height: 1.1; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.1rem, 5.4vw, 3.1rem); font-weight: 700; }
+h2 { font-size: clamp(1.5rem, 3.6vw, 2rem); font-weight: 700; }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+.app {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: 36px;
+  align-items: start;
+}
+
+/* ---------- Podium ---------- */
+.stage {
+  background: var(--stage);
+  border-radius: 24px;
+  padding: 18px 18px 16px;
+  display: grid;
+  gap: 10px;
+  position: sticky;
+  top: 16px;
+}
+#persona { width: 100%; height: auto; max-height: 72vh; display: block; }
+.stage-tag { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; font-size: 0.88rem; color: var(--ink-soft); }
+.stage-tag strong { color: var(--ink); font-weight: 600; }
+
+.halo { fill: var(--halo); }
+.tunic { fill: var(--tunic); }
+.collar { fill: none; stroke: var(--tunic-light); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.neck { fill: var(--skin-shade); }
+.pocket { fill: none; stroke: var(--tunic-light); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0.7; }
+.strings { fill: none; stroke: var(--tunic-light); stroke-width: 3.5; stroke-linecap: round; }
+.aglet { fill: var(--tunic-light); }
+.lanyard { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+.badge { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.badge-text { fill: var(--ink); font-family: var(--font-body); font-size: 10px; font-weight: 700; }
+.ear { fill: var(--skin-shade); }
+.face { fill: var(--skin); }
+.cheek { fill: var(--accent); opacity: 0.2; }
+.hair { fill: var(--hair); stroke: var(--hair); stroke-width: 6; stroke-linejoin: round; }
+.hair-line { fill: none; stroke: var(--hair-shade); stroke-width: 2; stroke-linecap: round; opacity: 0.7; }
+.brow { fill: none; stroke: var(--hair-shade); stroke-width: 4; stroke-linecap: round; }
+.eye { fill: var(--eye); }
+.glasses { fill: none; stroke: var(--glasses); stroke-width: 2.5; stroke-linecap: round; }
+.nose { fill: none; stroke: var(--skin-shade); stroke-width: 2.5; stroke-linecap: round; }
+.mouth-closed { fill: none; stroke: var(--mouth); stroke-width: 3.5; stroke-linecap: round; }
+.mouth-open { fill: var(--mouth); opacity: 0; transform-box: fill-box; transform-origin: center; }
+.arm-line { fill: none; stroke: var(--tunic); stroke-linecap: round; }
+.hand { fill: var(--skin); }
+
+.body { animation: breathe 4.2s ease-in-out infinite alternate; }
+.head { transform-origin: 180px 300px; transition: transform 0.6s ease; }
+.brows { transition: transform 0.5s ease; }
+.eye { transform-box: fill-box; transform-origin: center; animation: blink 5.5s infinite; }
+.arm { opacity: 0; }
+.forearm { transform-origin: 312px 330px; }
+
+.stage[data-mode="listen"] .head { transform: rotate(-3.5deg); }
+.stage[data-mode="listen"] .brows { transform: translateY(-3px); }
+.stage[data-talking="true"] .mouth-closed { opacity: 0; }
+.stage[data-talking="true"] .mouth-open { opacity: 1; animation: talk 0.7s ease-in-out infinite; }
+.stage[data-talking="true"] .head { animation: nod 1.9s ease-in-out infinite alternate; }
+.stage[data-wave="on"] .arm { animation: arm-show 2.9s ease-in-out forwards; }
+.stage[data-wave="on"] .forearm { animation: wave 0.55s ease-in-out 0.55s 4 alternate; }
+
+@keyframes breathe { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+@keyframes talk { 0% { transform: scaleY(0.2); } 25% { transform: scaleY(0.95); } 50% { transform: scaleY(0.4); } 75% { transform: scaleY(1); } 100% { transform: scaleY(0.25); } }
+@keyframes nod { from { transform: rotate(-1.3deg); } to { transform: rotate(1.3deg) translateY(1px); } }
+@keyframes arm-show { 0% { opacity: 0; transform: translateY(28px); } 14% { opacity: 1; transform: translateY(0); } 84% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(28px); } }
+@keyframes arm-fade { 0%, 100% { opacity: 0; } 15%, 85% { opacity: 1; } }
+@keyframes wave { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+
+/* ---------- Paneel ---------- */
+.panel { display: grid; gap: 22px; min-width: 0; }
+.panel-head { display: flex; align-items: center; gap: 14px; }
+.mini-web { width: 56px; height: 56px; flex: none; }
+.mini-web .ring { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.mini-web .spoke { stroke: var(--line); stroke-width: 1.5; }
+.mini-web .active { stroke: var(--accent); stroke-width: 4; stroke-linecap: round; }
+.mini-web .dot { fill: var(--accent); }
+.head-text { display: grid; min-width: 0; }
+.head-text small { color: var(--ink-soft); font-size: 0.85rem; }
+.head-text strong { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
+.spacer { flex: 1; }
+
+.btn {
+  appearance: none;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 0.7em 1.25em;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent);
+  color: var(--on-accent);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.ghost:hover { border-color: var(--ink-soft); }
+.btn.small { padding: 0.45em 0.9em; font-size: 0.92rem; }
+.sound { display: inline-flex; align-items: center; gap: 8px; }
+.sound svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sound[aria-pressed="false"] .wave-path { display: none; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.step { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--ink-soft); padding-top: 10px; border-top: 3px solid var(--line); }
+.step .n { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 0.8rem; border: 2px solid var(--line); }
+.step[aria-current="step"] { color: var(--ink); font-weight: 600; border-top-color: var(--accent); }
+.step[aria-current="step"] .n { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.step.is-done { border-top-color: var(--ink-soft); }
+.step.is-done .n { background: var(--ink-soft); border-color: var(--ink-soft); color: var(--bg); }
+
+.screen { display: grid; gap: 20px; align-content: start; }
+.lead { font-size: 1.08rem; color: var(--ink-soft); max-width: 52ch; }
+.note { font-size: 0.9rem; color: var(--ink-soft); max-width: 56ch; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+.who { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.eq { display: inline-flex; align-items: flex-end; gap: 3px; height: 16px; }
+.eq span { width: 4px; height: 5px; background: var(--accent); border-radius: 2px; }
+.eq[data-on="true"] span { animation: eq 0.9s ease-in-out infinite; }
+.eq[data-on="true"] span:nth-child(2) { animation-delay: 0.2s; }
+.eq[data-on="true"] span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes eq { 0%, 100% { height: 4px; } 50% { height: 16px; } }
+
+.caption { font-family: var(--font-display); font-size: clamp(1.25rem, 2.8vw, 1.6rem); line-height: 1.42; font-weight: 500; min-height: 8.5em; }
+.caption .line { opacity: 0.5; transition: opacity 0.35s ease; }
+.caption .line.is-done { opacity: 0.78; }
+.caption .line.is-now { opacity: 1; }
+
+.options { display: grid; gap: 12px; }
+.opt {
+  appearance: none;
+  text-align: left;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  padding: 16px;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+}
+.opt:hover { border-color: var(--accent); transform: translateY(-1px); }
+.opt .letter { width: 36px; height: 36px; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; }
+.opt strong { display: block; font-size: 1.05rem; line-height: 1.3; }
+.opt span.d { display: block; color: var(--ink-soft); font-size: 0.95rem; margin-top: 2px; }
+.opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-tint); }
+
+.scale { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; position: relative; padding-top: 6px; }
+.scale::before { content: ""; position: absolute; left: 16%; right: 16%; top: 22px; height: 3px; background: var(--line); }
+.stop { display: grid; justify-items: center; gap: 8px; text-align: center; position: relative; }
+.stop .knob { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); border: 3px solid var(--line); display: grid; place-items: center; font-weight: 700; font-family: var(--font-display); }
+.stop .lab { font-size: 0.85rem; color: var(--ink-soft); line-height: 1.3; }
+.pins { display: grid; gap: 6px; justify-items: center; min-height: 2.2em; }
+.pin { font-size: 0.82rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 2px solid var(--ink); }
+.pin.marian { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.pin.you { background: var(--ink); color: var(--bg); }
+.verdict { font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; }
+.takeaway { padding-left: 16px; border-left: 4px solid var(--accent); max-width: 56ch; }
+
+@media (max-width: 760px) {
+  body { padding-block: 16px; }
+  .app { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .stage { position: static; padding: 12px 12px 12px; }
+  #persona { max-height: 38vh; }
+  .caption { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .body, .eye, .stage[data-talking="true"] .head, .stage[data-wave="on"] .forearm, .eq[data-on="true"] span { animation: none !important; }
+  .stage[data-talking="true"] .mouth-open { animation: none; transform: scaleY(0.6); }
+  .stage[data-wave="on"] .arm { animation: arm-fade 2.9s ease-in-out forwards; }
+  .head, .brows, .opt, .btn, .caption .line { transition: none; }
+  .opt:hover, .btn:hover { transform: none; }
+}
+</style>
+
+<main class="app">
+  <div class="stage" id="stage" data-mode="idle" data-talking="false">
+    <svg id="persona" viewBox="0 0 360 440" role="img" aria-label="Daan, 23 jaar, student, met kort donker haar en een paarse hoodie">
+      <circle class="halo" cx="180" cy="236" r="158"/>
+      <g class="body">
+        <path class="tunic" d="M40 440 C40 372 84 336 138 326 L222 326 C276 336 320 372 320 440 Z"/>
+        <path class="pocket" d="M104 440 L126 398 L234 398 L256 440"/>
+        <path class="neck" d="M158 266 L202 266 L202 324 C196 346 164 346 158 324 Z"/>
+        <path class="collar" d="M144 326 C152 350 208 350 216 326"/>
+        <path class="strings" d="M168 352 L164 402 M192 352 L196 402"/>
+        <circle class="aglet" cx="164" cy="406" r="4"/>
+        <circle class="aglet" cx="196" cy="406" r="4"/>
+        <g class="arm">
+          <line class="arm-line" x1="282" y1="376" x2="312" y2="330" stroke-width="36"/>
+          <g class="forearm">
+            <line class="arm-line" x1="312" y1="330" x2="320" y2="272" stroke-width="30"/>
+            <circle class="hand" cx="322" cy="254" r="17"/>
+            <ellipse class="hand" cx="304" cy="262" rx="6" ry="10" transform="rotate(-20 304 262)"/>
+          </g>
+        </g>
+        <g class="head">
+          <ellipse class="ear" cx="119" cy="210" rx="9" ry="13"/>
+          <ellipse class="ear" cx="241" cy="210" rx="9" ry="13"/>
+          <ellipse class="face" cx="180" cy="202" rx="60" ry="70"/>
+          <circle class="cheek" cx="148" cy="232" r="9"/>
+          <circle class="cheek" cx="212" cy="232" r="9"/>
+          <path class="hair" d="M122 192 C110 128 146 104 184 106 C224 104 254 128 240 192 C236 168 228 152 214 146 C196 158 164 158 146 146 C134 154 126 170 122 192 Z"/>
+          <path class="hair-line" d="M150 122 C168 114 200 114 218 122 M176 132 C184 124 200 124 208 134"/>
+          <g class="brows">
+            <path class="brow" d="M148 188 Q161 183 173 187"/>
+            <path class="brow" d="M187 187 Q199 183 212 188"/>
+          </g>
+          <ellipse class="eye" cx="160" cy="205" rx="4.5" ry="5.5"/>
+          <ellipse class="eye" cx="200" cy="205" rx="4.5" ry="5.5"/>
+          <path class="nose" d="M181 211 C177 222 176 229 184 230"/>
+          <path class="mouth-closed" d="M164 245 Q180 258 196 245"/>
+          <ellipse class="mouth-open" cx="180" cy="248" rx="10" ry="8"/>
+        </g>
+      </g>
+    </svg>
+    <div class="stage-tag"><strong>Daan, 23</strong><span>Student hbo · fictieve persona</span></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <svg class="mini-web" viewBox="0 0 80 80" role="img" aria-label="Spinnenweb van Positieve Gezondheid met de tak Mentaal welbevinden uitgelicht">
+        <polygon class="ring" points="40,8 67.7,24 67.7,56 40,72 12.3,56 12.3,24"/>
+        <polygon class="ring" points="40,24 53.9,32 53.9,48 40,56 26.1,48 26.1,32"/>
+        <line class="spoke active" x1="40" y1="40" x2="67.7" y2="24"/>
+        <line class="spoke" x1="40" y1="40" x2="67.7" y2="56"/>
+        <line class="spoke" x1="40" y1="40" x2="40" y2="72"/>
+        <line class="spoke" x1="40" y1="40" x2="12.3" y2="56"/>
+        <line class="spoke" x1="40" y1="40" x2="12.3" y2="24"/>
+        <line class="spoke" x1="40" y1="40" x2="40" y2="8"/>
+        <circle class="dot" cx="67.7" cy="24" r="4.5"/>
+      </svg>
+      <div class="head-text"><small>Positieve Gezondheid</small><strong>Tak Mentaal welbevinden</strong></div>
+      <div class="spacer"></div>
+      <button class="btn ghost small sound" id="sound" type="button" aria-pressed="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave-path" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+        <span id="sound-label">Geluid aan</span>
+      </button>
+    </div>
+
+    <ol class="steps" aria-label="Voortgang">
+      <li class="step" data-step="1"><span class="n">1</span><span>Kennismaken</span></li>
+      <li class="step" data-step="2"><span class="n">2</span><span>Jouw inschatting</span></li>
+      <li class="step" data-step="3"><span class="n">3</span><span>Daan vertelt</span></li>
+    </ol>
+
+    <section class="screen" id="s-intro">
+      <h1>Ontmoet Daan</h1>
+      <p class="lead">Je hoort eerst wie Daan is. Daarna schat je in hoe belangrijk hij zijn mentaal welbevinden vindt voor zijn gezondheid. Tot slot vertelt Daan het zelf.</p>
+      <div class="actions"><button class="btn" id="start" type="button">Start animatie</button></div>
+      <p class="note" id="voice-note">Zet je geluid aan. De stem komt uit je browser. Heb je het geluid uit staan, dan lees je mee met de ondertitels.</p>
+    </section>
+
+    <section class="screen" id="s-talk" hidden>
+      <div class="who"><span id="who-name">Verteller</span><span class="eq" id="eq" data-on="false" aria-hidden="true"><span></span><span></span><span></span></span></div>
+      <p class="caption" id="cap-talk" aria-live="polite"></p>
+      <div class="actions"><button class="btn ghost small" id="skip" type="button">Overslaan</button><button class="btn ghost small" id="restart-talk" type="button">Opnieuw beginnen</button></div>
+    </section>
+
+    <section class="screen" id="s-ask" hidden>
+      <div class="who"><span>Verteller</span><span class="eq" id="eq-ask" data-on="false" aria-hidden="true"><span></span><span></span><span></span></span></div>
+      <p class="caption" id="cap-ask" aria-live="polite" style="min-height:0"></p>
+      <div class="options" id="options" role="group" aria-label="Kies wat je denkt dat Marian vindt"></div>
+    </section>
+
+    <section class="screen" id="s-result" hidden>
+      <h2 id="res-title" tabindex="-1">Zo kijkt Daan ernaar</h2>
+      <div class="scale" id="scale" role="img"></div>
+      <p class="verdict" id="res-verdict"></p>
+      <p class="takeaway" id="res-takeaway"></p>
+      <div class="actions"><button class="btn" id="again-choice" type="button">Andere keuze proberen</button><button class="btn ghost" id="again-all" type="button">Opnieuw beginnen</button></div>
+    </section>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* Alle teksten staan hier. Pas ze aan om een andere persona te maken. */
+  var P = {
+    name: 'Daan',
+    intro: [
+      'Dit is Daan. Hij is 23 en zit in het derde jaar van zijn hbo-opleiding.',
+      'Naast zijn studie werkt hij twee avonden per week in een supermarkt en traint hij drie keer per week bij zijn voetbalclub.',
+      'Daan haalt zijn punten. De laatste maanden ligt hij wel vaker wakker over deadlines en over wat hij na zijn afstuderen wil.',
+      'Hij is niet ziek, maar soms voelt hij zich overspoeld.',
+      'In het spinnenweb van Positieve Gezondheid gaat de tak Mentaal welbevinden over gevoelens en emoties, concentratie, zelfbeeld en omgaan met stress.'
+    ],
+    question: [
+      'Wat denk jij?',
+      'Hoe belangrijk vindt Daan zijn mentaal welbevinden voor zijn eigen gezondheid?'
+    ],
+    options: [
+      { id: 'A', short: 'Het belangrijkste', title: 'Het belangrijkste van alles', text: 'Als het in zijn hoofd niet goed zit, lukt de rest van zijn leven ook minder goed.' },
+      { id: 'B', short: 'Belangrijk, met de rest', title: 'Belangrijk, maar niet los van de rest', text: 'Hij let op zijn hoofd, maar kijkt ook naar zijn lichaam, zijn vrienden en zijn studie.' },
+      { id: 'C', short: 'Minder belangrijk', title: 'Minder belangrijk dan studie en sport', text: 'Hij is jong en fit. Zijn prestaties en zijn lichaam komen eerst.' }
+    ],
+    truth: 'A',
+    reactions: {
+      A: ['Ja, dat klopt.', 'Mooi dat je dat ziet, want veel mensen denken dat ik me vooral zorgen maak om mijn studie.'],
+      B: ['Dat snap ik, want ik let ook op mijn lichaam en op mijn vrienden.', 'Maar als ik moet kiezen, staat mijn hoofd bovenaan.'],
+      C: ['Dat snap ik, want ik ben jong en ik sport veel.', 'Maar zo zie ik het zelf niet.']
+    },
+    story: [
+      'Als het in mijn hoofd rommelt, merk ik dat overal. Ik slaap slechter, ik train minder fanatiek en ik heb minder zin om af te spreken.',
+      'Vroeger dacht ik dat gezond zijn betekende dat je fit bent en niet ziek wordt. Nu weet ik dat het vooral gaat om hoe ik met druk en gevoelens omga.',
+      'Daarom plan ik elke week een avond zonder verplichtingen, praat ik met mijn teamgenoten als iets me dwarszit en durf ik soms nee te zeggen tegen extra shifts.',
+      'Mijn hoofd bepaalt hoe ik naar de rest kijk. Mentaal welbevinden is voor mij dus het belangrijkste, ook als alles op papier goed gaat.'
+    ],
+    takeaway: 'Positieve Gezondheid kijkt niet alleen naar de afwezigheid van ziekte. Hoe iemand zich voelt, met stress omgaat en zichzelf ziet, hoort er volop bij.'
+  };
+
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+
+  var stage = $('#stage');
+  var screens = { intro: $('#s-intro'), talk: $('#s-talk'), ask: $('#s-ask'), result: $('#s-result') };
+  var capTalk = $('#cap-talk'), capAsk = $('#cap-ask');
+  var eqTalk = $('#eq'), eqAsk = $('#eq-ask');
+  var soundBtn = $('#sound'), soundLabel = $('#sound-label');
+  var voiceNote = $('#voice-note');
+
+  var runId = 0;
+  var phase = 'intro';
+  var choice = null;
+  var soundOn = true;
+  var playing = false;
+  var current = null;
+
+  /* ---------- Spraak ---------- */
+  var ttsOK = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  var nlVoices = [];
+  function loadVoices() {
+    if (!ttsOK) return;
+    nlVoices = speechSynthesis.getVoices().filter(function (v) { return /^nl([-_]|$)/i.test(v.lang); });
+    refreshNote();
+  }
+  function refreshNote() {
+    if (!ttsOK || nlVoices.length === 0) {
+      voiceNote.textContent = 'Je browser heeft geen Nederlandse stem. Je ziet daarom alleen ondertitels, Daan praat wel mee met zijn mond.';
+    } else {
+      voiceNote.textContent = 'Zet je geluid aan. De stem komt uit je browser. Heb je het geluid uit staan, dan lees je mee met de ondertitels.';
+    }
+    setEq();
+  }
+  if (ttsOK) {
+    loadVoices();
+    if (speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    setTimeout(loadVoices, 1200);
+  }
+  function hasVoice() { return ttsOK && nlVoices.length > 0; }
+  function pickVoice(role) {
+    var pref = role === 'marian' ? /(xander|ruben|frank|maarten|male|google nederlands)/i : /(claire|colette|fenna|ellen|female|vrouw)/i;
+    for (var i = 0; i < nlVoices.length; i++) if (pref.test(nlVoices[i].name)) return nlVoices[i];
+    return nlVoices[0];
+  }
+  function setEq() {
+    var on = String(playing && soundOn && hasVoice());
+    eqTalk.dataset.on = on;
+    eqAsk.dataset.on = on;
+  }
+
+  function speakLine(text, role) {
+    return new Promise(function (resolve) {
+      var words = text.split(/\s+/).length;
+      var est = 900 + words * 330;
+      var finished = false, timer = null, utter = null;
+      function finish() {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        current = null;
+        resolve();
+      }
+      current = { cancel: finish };
+      if (!(soundOn && hasVoice())) { timer = setTimeout(finish, est); return; }
+      utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'nl-NL';
+      utter.voice = pickVoice(role);
+      utter.rate = role === 'marian' ? 1 : 0.98;
+      utter.pitch = role === 'marian' ? 0.92 : (nlVoices.length > 1 ? 1 : 1.12);
+      function ended() {
+        if (utter._muted) { clearTimeout(timer); timer = setTimeout(finish, est * 0.6); }
+        else finish();
+      }
+      utter.onend = ended;
+      utter.onerror = ended;
+      current = { cancel: finish, utter: utter };
+      timer = setTimeout(finish, est * 2.5 + 2000);
+      speechSynthesis.speak(utter);
+    });
+  }
+
+  function stopSpeech() {
+    if (ttsOK) { try { speechSynthesis.cancel(); } catch (e) {} }
+    if (current && current.cancel) current.cancel();
+    current = null;
+  }
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  /* ---------- Ondertitels en afspelen ---------- */
+  function renderCaption(el, lines) {
+    el.textContent = '';
+    lines.forEach(function (t) {
+      var s = document.createElement('span');
+      s.className = 'line';
+      s.textContent = t + ' ';
+      el.appendChild(s);
+    });
+  }
+  function markLine(el, i) {
+    $$('.line', el).forEach(function (s, j) {
+      s.classList.toggle('is-now', j === i);
+      s.classList.toggle('is-done', j < i);
+    });
+  }
+  function setTalking(on) { stage.dataset.talking = String(on); }
+
+  async function playLines(lines, opts, id, el) {
+    renderCaption(el, lines);
+    playing = true; setEq();
+    for (var i = 0; i < lines.length; i++) {
+      if (id !== runId) return false;
+      markLine(el, i);
+      setTalking(opts.talking);
+      await speakLine(lines[i], opts.role);
+      if (id !== runId) return false;
+      setTalking(false);
+      await delay(280);
+    }
+    if (id !== runId) return false;
+    markLine(el, lines.length);
+    playing = false; setEq();
+    return true;
+  }
+
+  /* ---------- Schermen ---------- */
+  function show(name) {
+    Object.keys(screens).forEach(function (k) { screens[k].hidden = (k !== name); });
+  }
+  function setStep(n) {
+    $$('.step').forEach(function (li, i) {
+      li.classList.toggle('is-done', i + 1 < n);
+      if (i + 1 === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+    });
+  }
+  function setMode(m) { stage.dataset.mode = m; }
+  function wave() {
+    stage.removeAttribute('data-wave');
+    void stage.offsetWidth;
+    stage.setAttribute('data-wave', 'on');
+  }
+  function hardStop() {
+    runId++;
+    stopSpeech();
+    playing = false;
+    setTalking(false);
+    setEq();
+  }
+  function optionById(id) { return P.options.filter(function (o) { return o.id === id; })[0]; }
+
+  async function runIntro() {
+    hardStop();
+    var id = runId;
+    phase = 'intro';
+    choice = null;
+    setMode('idle');
+    show('talk');
+    setStep(1);
+    $('#who-name').textContent = 'Verteller';
+    wave();
+    var ok = await playLines(P.intro, { role: 'narrator', talking: false }, id, capTalk);
+    if (ok) runAsk();
+  }
+
+  async function runAsk() {
+    hardStop();
+    var id = runId;
+    phase = 'ask';
+    setMode('listen');
+    show('ask');
+    setStep(2);
+    buildOptions();
+    await playLines(P.question, { role: 'narrator', talking: false }, id, capAsk);
+  }
+
+  function buildOptions() {
+    var box = $('#options');
+    box.textContent = '';
+    P.options.forEach(function (o) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'opt';
+      b.setAttribute('aria-pressed', 'false');
+      b.innerHTML = '<span class="letter"></span><span><strong></strong><span class="d"></span></span>';
+      $('.letter', b).textContent = o.id;
+      $('strong', b).textContent = o.title;
+      $('.d', b).textContent = o.text;
+      b.addEventListener('click', function () { choose(o.id, b); });
+      box.appendChild(b);
+    });
+  }
+
+  async function choose(id, btn) {
+    hardStop();
+    choice = id;
+    $$('.opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+    var rid = runId;
+    await delay(500);
+    if (rid !== runId) return;
+    runReveal();
+  }
+
+  async function runReveal() {
+    hardStop();
+    var id = runId;
+    phase = 'reveal';
+    setMode('idle');
+    show('talk');
+    setStep(3);
+    $('#who-name').textContent = P.name;
+    var lines = P.reactions[choice].concat(P.story);
+    var ok = await playLines(lines, { role: 'marian', talking: true }, id, capTalk);
+    if (ok) showResult();
+  }
+
+  function showResult() {
+    hardStop();
+    phase = 'result';
+    setMode('idle');
+    show('result');
+    setStep(3);
+    var you = optionById(choice), her = optionById(P.truth);
+    var scale = $('#scale');
+    scale.textContent = '';
+    P.options.forEach(function (o) {
+      var stop = document.createElement('div');
+      stop.className = 'stop';
+      var pins = document.createElement('div');
+      pins.className = 'pins';
+      if (o.id === choice) pins.insertAdjacentHTML('beforeend', '<span class="pin you">Jij</span>');
+      if (o.id === P.truth) pins.insertAdjacentHTML('beforeend', '<span class="pin marian">Daan</span>');
+      var knob = document.createElement('div'); knob.className = 'knob'; knob.textContent = o.id;
+      var lab = document.createElement('div'); lab.className = 'lab'; lab.textContent = o.short;
+      stop.appendChild(knob); stop.appendChild(lab); stop.appendChild(pins);
+      scale.appendChild(stop);
+    });
+    scale.setAttribute('aria-label', 'Jij koos ' + you.id + ', ' + you.short + '. Daan kiest ' + her.id + ', ' + her.short + '.');
+    $('#res-verdict').textContent = choice === P.truth
+      ? 'Je inschatting komt overeen met die van Marian.'
+      : 'Daan ziet het anders dan jij dacht. Hij kiest: ' + her.title.toLowerCase() + '.';
+    $('#res-takeaway').textContent = P.takeaway;
+    $('#res-title').focus({ preventScroll: true });
+  }
+
+  /* ---------- Knoppen ---------- */
+  $('#start').addEventListener('click', runIntro);
+  $('#restart-talk').addEventListener('click', function () { hardStop(); setMode('idle'); show('intro'); setStep(0); });
+  $('#again-all').addEventListener('click', function () { hardStop(); setMode('idle'); show('intro'); setStep(0); });
+  $('#again-choice').addEventListener('click', function () { runAsk(); });
+  $('#skip').addEventListener('click', function () {
+    if (phase === 'intro') runAsk();
+    else if (phase === 'reveal') showResult();
+  });
+  soundBtn.addEventListener('click', function () {
+    soundOn = !soundOn;
+    soundBtn.setAttribute('aria-pressed', String(soundOn));
+    soundLabel.textContent = soundOn ? 'Geluid aan' : 'Geluid uit';
+    if (!soundOn && current && current.utter) {
+      current.utter._muted = true;
+      try { speechSynthesis.cancel(); } catch (e) {}
+    }
+    setEq();
+  });
+
+  setStep(0);
+})();
+</script>
+
+</body></html>
