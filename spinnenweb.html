@@ -73,6 +73,10 @@
   dialog h3 { margin-top: 0; }
   .range { padding: 8px 12px; border-left: 5px solid; margin: 8px 0; background: var(--bg); border-radius: 0 8px 8px 0; }
   svg#trend { width: 100%; height: auto; }
+  dialog.wide { max-width: 1100px; width: 95%; }
+  #infoFrame { width: 100%; height: 75vh; border: 0; border-radius: 8px; background: #fff; }
+  #infoFrame[hidden] { display: none; }
+  .clickable { cursor: pointer; }
 
   /* ===== Afdrukken / PDF: alleen het spinnenweb met kop ===== */
   #printHead { display: none; }
@@ -139,6 +143,7 @@
   <h3 id="infoTitle"></h3>
   <p id="infoText"></p>
   <div id="infoRanges"></div>
+  <iframe id="infoFrame" title="Animatie" hidden></iframe>
   <div class="row"><button class="primary" id="closeDlg">Sluiten</button></div>
 </dialog>
 
@@ -148,22 +153,22 @@
    1. DATA: dimensies, uitleg en voorbeelden per scorebereik
    ========================================================== */
 const DIMS = [
-  { name: "Lichaamsfuncties", lines: ["Lichaams-", "functies"],
+  { name: "Lichaamsfuncties", lines: ["Lichaams-", "functies"], page: "Marian-lichaamsfuncties.html",
     text: "Hoe voelt je lichaam? Denk aan energie, slaap, pijn en lichamelijke klachten.",
     hi: "Veel energie, slaap je goed, weinig klachten.", mid: "Soms moe of lichte pijn; slaap wisselt.", lo: "Veel vermoeidheid, pijn of slaapproblemen." },
-  { name: "Mentaal welbevinden", lines: ["Mentaal", "welbevinden"],
+  { name: "Mentaal welbevinden", lines: ["Mentaal", "welbevinden"],  page: "Daan-mentaal-welbevinden.html",
     text: "Hoe gaat het met je gevoelens en gedachten? Denk aan stemming, stress, concentratie en veerkracht.",
     hi: "Meestal opgewekt, goed te concentreren, kunt stress goed aan.", mid: "Soms piekeren of gespannen, maar je herstelt weer.", lo: "Vaak somber, angstig of overspannen; moeilijk te concentreren." },
-  { name: "Zingeving", lines: ["Zingeving"],
+  { name: "Zingeving", lines: ["Zingeving"],  page: "Roos-zingeving.html",
     text: "Heeft je leven richting en betekenis? Denk aan doelen, waarden, hoop en vertrouwen in de toekomst.",
     hi: "Je weet waar je het voor doet en voelt vertrouwen.", mid: "Soms twijfel je over wat belangrijk is.", lo: "Je mist richting, betekenis of hoop." },
-  { name: "Kwaliteit van leven", lines: ["Kwaliteit", "van leven"],
+  { name: "Kwaliteit van leven", lines: ["Kwaliteit", "van leven"],  page: "Henk-kwaliteit-van-leven.html",
     text: "Hoe tevreden ben je met je leven als geheel? Denk aan genieten, geluk, woonsituatie en welzijn.",
     hi: "Je geniet en bent tevreden met je leven.", mid: "Goede en mindere momenten houden elkaar in balans.", lo: "Weinig plezier of tevredenheid; het leven voelt zwaar." },
-  { name: "Sociaal-maatschappelijk participeren", lines: ["Sociaal-maatschappelijk", "participeren"],
+  { name: "Sociaal-maatschappelijk participeren", lines: ["Sociaal-maatschappelijk", "participeren"],  page: "Lena-sociaal-maatschappelijk-participeren.html",
     text: "Doe je mee in de samenleving? Denk aan vrienden, familie, werk, vrijwilligerswerk en erbij horen.",
     hi: "Een stevig netwerk; je doet mee en voelt je gewaardeerd.", mid: "Wel contacten, maar je mist soms verbinding.", lo: "Eenzaam of buitengesloten; weinig sociale activiteiten." },
-  { name: "Dagelijks functioneren", lines: ["Dagelijks", "functioneren"],
+  { name: "Dagelijks functioneren", lines: ["Dagelijks", "functioneren"],  page: "Samir-dagelijks-functioneren.html",
     text: "Hoe goed lukt je dagelijks leven? Denk aan zelfzorg, huishouden, mobiliteit, geldzaken en regie.",
     hi: "Je regelt alles zelfstandig en houdt de regie.", mid: "Meestal redt je het, soms met hulp of moeite.", lo: "Dagelijkse taken lukken moeilijk; veel hulp nodig." }
 ];
@@ -295,6 +300,7 @@ DIMS.forEach((d, i) => {
   ic.innerHTML = iconInner(i);
   const t = el("text", { x: px, y: py + 40, "text-anchor": "middle", class: "label" }, svg);
   d.lines.forEach((ln, k) => { const ts = el("tspan", { x: px, dy: k ? 16 : 0 }, t); ts.textContent = ln; });
+  [ic, t].forEach(n => { n.classList.add("clickable"); n.addEventListener("click", () => openInfo(i)); });
   const bx = px + 22, by = py - 20;
   const ig = el("g", { class: "info", tabindex: 0, role: "button", "aria-label": `Uitleg over ${d.name}` }, svg);
   el("circle", { cx: bx, cy: by, r: 9 }, ig);
@@ -415,8 +421,16 @@ function openInfo(i) {
     `<div class="range" style="border-color:${scoreColor(9)}"><strong>Score 8–10:</strong> ${d.hi}</div>
      <div class="range" style="border-color:${scoreColor(5.5)}"><strong>Score 4–6:</strong> ${d.mid}</div>
      <div class="range" style="border-color:${scoreColor(1)}"><strong>Score 0–2:</strong> ${d.lo}</div>`;
+  // Dimensies met een eigen pagina (bijv. Marian over lichaamsfuncties) spelen die af in het venster
+  const frame = document.getElementById("infoFrame");
+  dlg.classList.toggle("wide", !!d.page);
+  document.getElementById("infoText").hidden = !!d.page;
+  document.getElementById("infoRanges").hidden = !!d.page;
+  if (d.page) { frame.title = d.name; frame.src = d.page; frame.hidden = false; }
+  else { frame.hidden = true; frame.removeAttribute("src"); }
   dlg.showModal();
 }
+dlg.addEventListener("close", () => { const f = document.getElementById("infoFrame"); f.removeAttribute("src"); f.hidden = true; });
 document.getElementById("closeDlg").addEventListener("click", () => dlg.close());
 dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
 
