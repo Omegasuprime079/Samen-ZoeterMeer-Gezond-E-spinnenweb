@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Positive Health – Spinnenweb</title>
+<style>
+  /* ===== Thema (licht/donker) via CSS-variabelen ===== */
+  :root {
+    --bg: #f4f7fa; --card: #ffffff; --text: #1b2733; --muted: #4a5a6a;
+    --border: #c9d4de; --ring: #d3dce5; --accent: #006c9c; --accent-text: #ffffff;
+    --danger: #b3261e; --poly-fill: rgba(0,150,200,0.5); --poly-stroke: #00799f;
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1720; --card: #17222e; --text: #e8eef4; --muted: #a9b8c6;
+    --border: #35485a; --ring: #2c3d4d; --accent: #4cc3f0; --accent-text: #08202c;
+    --danger: #ff8a80; --poly-fill: rgba(0,150,200,0.5); --poly-stroke: #4cc3f0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-width: 768px; }
+  header { display: flex; justify-content: space-between; align-items: center; padding: 16px 28px; flex-wrap: wrap; gap: 12px; }
+  h1 { margin: 0; font-size: 1.5rem; }
+  h2 { margin: 0 0 12px; font-size: 1.15rem; }
+  .toolbar { display: flex; gap: 16px; align-items: center; color: var(--muted); }
+  main { display: grid; grid-template-columns: minmax(420px, 1.4fr) minmax(280px, 1fr); gap: 20px; padding: 0 28px 28px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .full { grid-column: 1 / -1; }
+  button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 8px 14px; }
+  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+  button.danger { color: var(--danger); }
+  button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 3px solid #f5a300; outline-offset: 2px; }
+  input[type=text], input[type=number] { font: inherit; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
+
+  /* ===== Spinnenweb ===== */
+  svg#web { width: 100%; height: auto; max-height: 78vh; display: block; touch-action: none; }
+  .ring { fill: none; stroke: var(--ring); stroke-width: 1; }
+  .ring.major { stroke-width: 1.8; }
+  .ring-num { fill: var(--muted); font-size: 11px; pointer-events: none; }
+  .axis-line { stroke: var(--ring); stroke-width: 1.5; }
+  .axis { outline: none; }
+  .axis:focus-visible .axis-line { stroke: #f5a300; stroke-width: 4; }
+  .hit { stroke: transparent; stroke-width: 30; cursor: pointer; }
+  .tick { fill: var(--card); stroke: var(--muted); stroke-width: 1.5; pointer-events: none; }
+  .hit-dot { fill: transparent; cursor: pointer; }
+  .axis:hover .tick { stroke: var(--accent); }
+  .label { fill: var(--text); font-size: 14px; font-weight: 600; }
+  .info { cursor: pointer; }
+  .info circle { fill: var(--card); stroke: var(--accent); stroke-width: 1.5; }
+  .info text { fill: var(--accent); font-size: 13px; font-weight: 700; pointer-events: none; }
+  #poly { fill: var(--poly-fill); stroke: var(--poly-stroke); stroke-width: 2.5; stroke-linejoin: round; }
+  .dot { stroke: var(--card); stroke-width: 2; pointer-events: none; }
+  .val { fill: var(--text); font-size: 12px; font-weight: 700; pointer-events: none; paint-order: stroke; stroke: var(--card); stroke-width: 3px; }
+
+  /* ===== Zijpaneel ===== */
+  .dim-row { display: grid; grid-template-columns: 1fr auto 70px; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .dim-row:last-child { border-bottom: 0; }
+  .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; background: var(--ring); }
+  .info-btn { padding: 2px 9px; border-radius: 50%; font-weight: 700; color: var(--accent); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+  #msg { min-height: 1.4em; margin: 8px 0 0; font-weight: 600; }
+  #msg.err { color: var(--danger); }
+  #msg.ok { color: #1a7f37; }
+  :root[data-theme="dark"] #msg.ok { color: #6fdc8c; }
+
+  /* ===== Profielen ===== */
+  ul#profiles { list-style: none; margin: 0; padding: 0; }
+  ul#profiles li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .p-meta { color: var(--muted); font-size: .9rem; }
+
+  /* ===== Modal ===== */
+  dialog { max-width: 520px; width: 90%; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); padding: 22px; }
+  dialog::backdrop { background: rgba(0,0,0,.5); }
+  dialog h3 { margin-top: 0; }
+  .range { padding: 8px 12px; border-left: 5px solid; margin: 8px 0; background: var(--bg); border-radius: 0 8px 8px 0; }
+  svg#trend { width: 100%; height: auto; }
+  dialog.wide { max-width: 1100px; width: 95%; }
+  #infoFrame { width: 100%; height: 75vh; border: 0; border-radius: 8px; background: #fff; }
+  #infoFrame[hidden] { display: none; }
+  .clickable { cursor: pointer; }
+
+  /* ===== Afdrukken / PDF: alleen het spinnenweb met kop ===== */
+  #printHead { display: none; }
+  @media print {
+    body { min-width: 0; background: #fff; color: #000; }
+    header, #scoreCard, #profCard, #trendCard, .toolbar { display: none !important; }
+    main { display: block; padding: 0; }
+    .card { border: 0; }
+    #printHead { display: block; font-size: 1.1rem; margin-bottom: 8px; }
+    :root[data-theme="dark"] { --card: #fff; --text: #000; --muted: #333; --ring: #ccc; --bg: #fff; --poly-stroke: #00799f; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Positive Health – Spinnenweb</h1>
+  <div class="toolbar">
+    <label>Animatiesnelheid
+      <input type="range" id="speed" min="0.25" max="3" step="0.25" value="1" aria-label="Animatiesnelheid">
+    </label>
+    <button id="themeBtn" aria-pressed="false">🌙 Donker</button>
+  </div>
+</header>
+
+<main>
+  <section class="card" aria-labelledby="webTitle">
+    <h2 id="webTitle">Jouw spinnenweb</h2>
+    <div id="printHead"></div>
+    <p style="margin:0 0 8px;color:var(--muted)">Klik of sleep op een punt van een lijn om een score te kiezen (0, 2, 4, 6, 8 of 10). Met toetsenbord: Tab naar een dimensie, dan pijltjestoetsen.</p>
+    <svg id="web" viewBox="-70 0 780 690" role="group" aria-label="Spinnenweb Positive Health"></svg>
+  </section>
+
+  <section class="card" id="scoreCard" aria-labelledby="scoreTitle">
+    <h2 id="scoreTitle">Scores &amp; opslaan</h2>
+    <div id="dimList"></div>
+    <div class="row">
+      <label for="name">Naam</label>
+      <input type="text" id="name" maxlength="40" placeholder="Bijv. Stephan" autocomplete="off">
+      <button class="primary" id="saveBtn">Opslaan</button>
+      <button class="danger" id="resetBtn">Reset</button>
+    </div>
+    <div class="row" aria-label="Exporteren">
+      <strong>Exporteren:</strong>
+      <button id="pngBtn">PNG</button>
+      <button id="pdfBtn">PDF / afdrukken</button>
+      <button id="jsonBtn">JSON</button>
+    </div>
+    <p id="msg" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="card full" id="profCard" aria-labelledby="profTitle">
+    <h2 id="profTitle">Opgeslagen profielen</h2>
+    <ul id="profiles"></ul>
+  </section>
+
+  <section class="card full" id="trendCard" aria-labelledby="trendTitle">
+    <h2 id="trendTitle">Trend (gemiddelde score per opslag)</h2>
+    <p id="trendInfo" style="color:var(--muted);margin-top:0"></p>
+    <svg id="trend" viewBox="0 0 800 240" role="img" aria-label="Trendgrafiek van gemiddelde scores"></svg>
+  </section>
+</main>
+
+<dialog id="infoDlg" aria-labelledby="infoTitle">
+  <h3 id="infoTitle"></h3>
+  <p id="infoText"></p>
+  <div id="infoRanges"></div>
+  <iframe id="infoFrame" title="Animatie" hidden></iframe>
+  <div class="row"><button class="primary" id="closeDlg">Sluiten</button></div>
+</dialog>
+
+<script>
+"use strict";
+/* ==========================================================
+   1. DATA: dimensies, uitleg en voorbeelden per scorebereik
+   ========================================================== */
+const DIMS = [
+  { name: "Lichaamsfuncties", lines: ["Lichaams-", "functies"], page: "Marian-lichaamsfuncties.html",
+    text: "Hoe voelt je lichaam? Denk aan energie, slaap, pijn en lichamelijke klachten.",
+    hi: "Veel energie, slaap je goed, weinig klachten.", mid: "Soms moe of lichte pijn; slaap wisselt.", lo: "Veel vermoeidheid, pijn of slaapproblemen." },
+  { name: "Mentaal welbevinden", lines: ["Mentaal", "welbevinden"],  page: "Daan-mentaal-welbevinden.html",
+    text: "Hoe gaat het met je gevoelens en gedachten? Denk aan stemming, stress, concentratie en veerkracht.",
+    hi: "Meestal opgewekt, goed te concentreren, kunt stress goed aan.", mid: "Soms piekeren of gespannen, maar je herstelt weer.", lo: "Vaak somber, angstig of overspannen; moeilijk te concentreren." },
+  { name: "Zingeving", lines: ["Zingeving"],  page: "Roos-zingeving.html",
+    text: "Heeft je leven richting en betekenis? Denk aan doelen, waarden, hoop en vertrouwen in de toekomst.",
+    hi: "Je weet waar je het voor doet en voelt vertrouwen.", mid: "Soms twijfel je over wat belangrijk is.", lo: "Je mist richting, betekenis of hoop." },
+  { name: "Kwaliteit van leven", lines: ["Kwaliteit", "van leven"],  page: "Henk-kwaliteit-van-leven.html",
+    text: "Hoe tevreden ben je met je leven als geheel? Denk aan genieten, geluk, woonsituatie en welzijn.",
+    hi: "Je geniet en bent tevreden met je leven.", mid: "Goede en mindere momenten houden elkaar in balans.", lo: "Weinig plezier of tevredenheid; het leven voelt zwaar." },
+  { name: "Sociaal-maatschappelijk participeren", lines: ["Sociaal-maatschappelijk", "participeren"],  page: "Lena-sociaal-maatschappelijk-participeren.html",
+    text: "Doe je mee in de samenleving? Denk aan vrienden, familie, werk, vrijwilligerswerk en erbij horen.",
+    hi: "Een stevig netwerk; je doet mee en voelt je gewaardeerd.", mid: "Wel contacten, maar je mist soms verbinding.", lo: "Eenzaam of buitengesloten; weinig sociale activiteiten." },
+  { name: "Dagelijks functioneren", lines: ["Dagelijks", "functioneren"],  page: "Samir-dagelijks-functioneren.html",
+    text: "Hoe goed lukt je dagelijks leven? Denk aan zelfzorg, huishouden, mobiliteit, geldzaken en regie.",
+    hi: "Je regelt alles zelfstandig en houdt de regie.", mid: "Meestal redt je het, soms met hulp of moeite.", lo: "Dagelijkse taken lukken moeilijk; veel hulp nodig." }
+];
+const N = DIMS.length, MAX = 10;
+const VALUES = [0, 2, 4, 6, 8, 10];   // de 6 klikbare punten per as
+const UNSET = -1;                      // nog geen score gekozen (0 is zelf een geldige score)
+const isSet = v => v >= 0;
+const valid = v => Number.isInteger(v) && v >= 0 && v <= MAX && v % 2 === 0;
+const snap = v => Math.min(MAX, Math.max(0, Math.round(v / 2) * 2));   // rond af op 0,2,4,6,8,10
+const fmt = v => isSet(v) ? v : "–";
+const STORAGE_KEY = "positiveHealthProfiles";
+
+/* ==========================================================
+   2. GEOMETRIE: polygoonpunten met trigonometrie
+   Elke as i staat op hoek = -90° + i * (360°/6): dimensie 0 wijst
+   recht omhoog, de rest volgt met de klok mee. Een score s ligt op
+   afstand r = (s / 10) * R van het middelpunt:
+       x = cx + r * cos(hoek)      y = cy + r * sin(hoek)
+   ========================================================== */
+const CX = 320, CY = 335, R = 200;
+const angle = i => -Math.PI / 2 + i * (2 * Math.PI / N);
+// Score 0 ligt op een kleine binnenstraal R0 (net als in het iPH-spinnenweb), zodat de punten 0 per as los van elkaar blijven
+const R0 = 45;
+const radius = s => R0 + (s / MAX) * (R - R0);
+const pt = (i, s) => { const r = radius(s), a = angle(i); return [CX + r * Math.cos(a), CY + r * Math.sin(a)]; };
+// Kleurverloop rood (1) -> oranje -> groen (10) via HSL-tint 0..120
+const scoreColor = s => `hsl(${Math.round((Math.min(MAX, Math.max(0, s)) / MAX) * 120)}, 75%, 42%)`;
+
+/* ==========================================================
+   3. STATE
+   target  = gekozen score (0 = nog niet gekozen)
+   shown   = huidige (geanimeerde) waarde die getekend wordt
+   ========================================================== */
+const target = Array(N).fill(UNSET);
+const shown = Array(N).fill(0);
+const from = Array(N).fill(0);
+const startT = Array(N).fill(0);
+let polyOpacity = 1, fade = null;      // fade = {start, from} tijdens resetten
+let speed = 1;
+const baseDur = 700;                    // ms bij snelheid 1
+let rafId = null;
+
+/* ==========================================================
+   3b. ICONEN per dimensie (48x48): gekleurde cirkel + wit pictogram
+   Kleuren volgen het iPH-gespreksinstrument.
+   ========================================================== */
+const ICON_COLORS = ["#e5173f", "#00a3e0", "#7b2d86", "#f5a000", "#ee7203", "#8cc63f"];
+const ICON_GLYPHS = [
+  // 0 Lichaamsfuncties: rennende figuur
+  `<circle cx="29" cy="13" r="3.5"/><path d="M26 19 L19 25 L26 30 L21 38 M19 25 L11 23 M26 21 L34 25 M26 30 L34 36 L38 35"/>`,
+  // 1 Mentaal welbevinden: figuur met geheven armen (Y)
+  `<circle cx="24" cy="12" r="3.5"/><path d="M13 18 L24 28 L35 18 M24 28 V39"/>`,
+  // 2 Zingeving: figuur met hartje
+  `<circle cx="31" cy="14" r="3.5"/><path d="M12 24 H36 M24 24 V38 M33 20 V38" /><path d="M16 15 c-3 -3 -6 0 -3 3 l3 3 l3 -3 c3 -3 0 -6 -3 -3z" fill="#fff" stroke-width="1.5"/>`,
+  // 3 Kwaliteit van leven: zon boven figuur
+  `<circle cx="24" cy="12" r="3"/><path d="M24 4 V6 M17 7 L18.5 8.5 M31 7 L29.5 8.5 M14 13 H16 M32 13 H34"/><path d="M14 24 L24 31 L34 24 M24 31 V40"/>`,
+  // 4 Meedoen: twee hoofden en een M
+  `<circle cx="15" cy="12" r="3.2"/><circle cx="33" cy="12" r="3.2"/><path d="M13 38 V21 L24 31 L35 21 V38" stroke-width="4.5"/>`,
+  // 5 Dagelijks functioneren: twee personen aan tafel
+  `<circle cx="14" cy="13" r="3.2"/><circle cx="34" cy="13" r="3.2"/><path d="M10 25 H38 M15 25 V34 M33 25 V34 M15 31 H33"/>`
+];
+function iconInner(i) {
+  return `<circle cx="24" cy="24" r="24" fill="${ICON_COLORS[i]}"/>
+          <g fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${ICON_GLYPHS[i]}</g>`;
+}
+const iconSvg = (i, size) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" aria-hidden="true" style="flex:none">${iconInner(i)}</svg>`;
+
+/* ==========================================================
+   4. SVG OPBOUW (eenmalig)
+   ========================================================== */
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("web");
+const el = (tag, attrs = {}, parent) => {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+
+// Concentrische cirkels bij 0, 2, 4, 6, 8 en 10
+VALUES.forEach(s => el("circle", { cx: CX, cy: CY, r: radius(s), class: "ring" + (s === MAX ? " major" : "") }, svg));
+
+const polyEl = el("polygon", { id: "poly", points: "" }, svg);
+const axisGroups = [], tickEls = [], dotEls = [], valEls = [];
+
+DIMS.forEach((d, i) => {
+  const g = el("g", { class: "axis", tabindex: 0, role: "slider", "aria-valuemin": 0, "aria-valuemax": MAX,
+                      "aria-valuenow": 0, "aria-valuetext": "nog niet ingevuld", "aria-label": `Score voor ${d.name}: nog niet ingevuld` }, svg);
+  const [x2, y2] = pt(i, MAX), [x0, y0] = pt(i, 0);
+  el("line", { x1: x0, y1: y0, x2, y2, class: "axis-line" }, g);
+  el("line", { x1: x0, y1: y0, x2, y2, class: "hit" }, g);           // brede, onzichtbare klikzone
+  tickEls[i] = {};
+  VALUES.forEach(s => {
+    const [x, y] = pt(i, s);
+    el("circle", { cx: x, cy: y, r: 17, class: "hit-dot" }, g);      // grote onzichtbare klikzone per punt
+    tickEls[i][s] = el("circle", { cx: x, cy: y, r: 10, class: "tick" }, g);   // zichtbaar punt
+  });
+  // Klik/sleep: projecteer muispositie op de as en rond af naar 0,2,4,6,8,10
+  const pick = ev => {
+    const p = svg.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY;
+    const q = p.matrixTransform(svg.getScreenCTM().inverse());
+    const a = angle(i);
+    const proj = (q.x - CX) * Math.cos(a) + (q.y - CY) * Math.sin(a); // scalair product met aseenheidsvector
+    setScore(i, snap(((proj - R0) / (R - R0)) * MAX));
+  };
+  let dragging = false;
+  g.addEventListener("pointerdown", ev => { if (ev.target.closest(".info")) return; dragging = true; g.setPointerCapture(ev.pointerId); pick(ev); g.focus(); });
+  g.addEventListener("pointermove", ev => { if (dragging) pick(ev); });
+  g.addEventListener("pointerup", () => dragging = false);
+  g.addEventListener("keydown", ev => {
+    const cur = target[i];
+    let v = null;
+    if (ev.key === "ArrowUp" || ev.key === "ArrowRight") v = isSet(cur) ? Math.min(MAX, cur + 2) : 0;
+    else if (ev.key === "ArrowDown" || ev.key === "ArrowLeft") v = isSet(cur) ? Math.max(0, cur - 2) : 0;
+    else if (ev.key === "Home") v = 0;
+    else if (ev.key === "End") v = MAX;
+    else if (/^[0-9]$/.test(ev.key)) v = snap(+ev.key);
+    if (v !== null) { ev.preventDefault(); setScore(i, v); }
+  });
+  axisGroups[i] = g;
+});
+
+// Labels + ⓘ-knoppen (buiten de as-groepen zodat ze eigen focus hebben)
+DIMS.forEach((d, i) => {
+  // Icoon (gekleurde cirkel met wit pictogram) buiten de as, label eronder – zoals in het iPH-gespreksinstrument
+  const a = angle(i), rr = Math.abs(Math.cos(a)) > 0.2 ? R + 75 : R + 80;
+  const px = CX + rr * Math.cos(a), py = CY + rr * Math.sin(a);
+  const ic = el("g", { transform: `translate(${px - 22},${py - 22}) scale(${44 / 48})`, "aria-hidden": "true" }, svg);
+  ic.innerHTML = iconInner(i);
+  const t = el("text", { x: px, y: py + 40, "text-anchor": "middle", class: "label" }, svg);
+  d.lines.forEach((ln, k) => { const ts = el("tspan", { x: px, dy: k ? 16 : 0 }, t); ts.textContent = ln; });
+  [ic, t].forEach(n => { n.classList.add("clickable"); n.addEventListener("click", () => openInfo(i)); });
+  const bx = px + 22, by = py - 20;
+  const ig = el("g", { class: "info", tabindex: 0, role: "button", "aria-label": `Uitleg over ${d.name}` }, svg);
+  el("circle", { cx: bx, cy: by, r: 9 }, ig);
+  const it = el("text", { x: bx, y: by + 4.5, "text-anchor": "middle" }, ig); it.textContent = "i";
+  ig.addEventListener("click", () => openInfo(i));
+  ig.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openInfo(i); } });
+});
+
+// Ringnummers langs de verticale as-rand (alleen 5 en 10 om rommelig te voorkomen)
+VALUES.forEach(s => { const t = el("text", { x: CX + 15, y: CY - radius(s) + 4, class: "ring-num" }, svg); t.textContent = s; });
+
+// Stippen en waarde-labels bovenop de polygoon
+DIMS.forEach((_, i) => {
+  dotEls[i] = el("circle", { r: 7, class: "dot", visibility: "hidden" }, svg);
+  valEls[i] = el("text", { "text-anchor": "middle", class: "val", visibility: "hidden" }, svg);
+});
+
+/* ==========================================================
+   5. ANIMATIE (requestAnimationFrame + easing)
+   Elke as heeft eigen from/to/start. Elk frame:
+   shown = from + (to - from) * easeInOut(t)
+   ========================================================== */
+const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+function frame(now) {
+  let busy = false;
+  const dur = baseDur / speed;
+  for (let i = 0; i < N; i++) {
+    const t = Math.min(1, (now - startT[i]) / dur);
+    shown[i] = from[i] + (target[i] - from[i]) * ease(t);
+    if (t < 1) busy = true;
+  }
+  if (fade) { // reset: polygoon vervaagt, daarna worden scores gewist
+    const t = Math.min(1, (now - fade.start) / dur);
+    polyOpacity = 1 - t;
+    if (t < 1) busy = true;
+    else { fade = null; target.fill(UNSET); shown.fill(0); from.fill(0); polyOpacity = 1; syncUI(); }
+  }
+  draw();
+  rafId = busy ? requestAnimationFrame(frame) : null;
+}
+const kick = () => { if (!rafId) rafId = requestAnimationFrame(frame); };
+
+function draw() {
+  const pts = shown.map((s, i) => pt(i, s).join(",")).join(" ");
+  polyEl.setAttribute("points", pts);
+  polyEl.setAttribute("opacity", polyOpacity);
+  polyEl.style.display = target.some(isSet) || fade ? "" : "none";
+  for (let i = 0; i < N; i++) {
+    const has = isSet(target[i]) || fade;
+    const [x, y] = pt(i, shown[i]);
+    dotEls[i].setAttribute("visibility", has ? "visible" : "hidden");
+    dotEls[i].setAttribute("cx", x); dotEls[i].setAttribute("cy", y);
+    dotEls[i].setAttribute("fill", scoreColor(isSet(target[i]) ? target[i] : shown[i]));
+    dotEls[i].setAttribute("opacity", polyOpacity);
+    const a = angle(i), off = 20;
+    valEls[i].setAttribute("visibility", has ? "visible" : "hidden");
+    valEls[i].setAttribute("x", x + off * Math.cos(a)); valEls[i].setAttribute("y", y + off * Math.sin(a) + 4);
+    valEls[i].setAttribute("opacity", polyOpacity);
+    valEls[i].textContent = has ? Math.round(shown[i]) : "";
+  }
+}
+
+/* ==========================================================
+   6. SCORES ZETTEN + UI SYNCHRONISEREN
+   ========================================================== */
+function setScore(i, v, animate = true) {
+  v = Number(v);
+  if (!valid(v)) return false;   // invoervalidatie: alleen 0, 2, 4, 6, 8, 10
+  from[i] = shown[i]; target[i] = v; startT[i] = performance.now();
+  if (!animate) { shown[i] = v; from[i] = v; }
+  fade = null; polyOpacity = 1;
+  syncUI(); kick();
+  return true;
+}
+
+const dimList = document.getElementById("dimList");
+const inputs = [], swatches = [];
+DIMS.forEach((d, i) => {
+  const row = document.createElement("div"); row.className = "dim-row";
+  row.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${iconSvg(i, 30)}<span><span class="swatch"></span>${d.name}</span></span>
+    <button class="info-btn" aria-label="Uitleg over ${d.name}">ⓘ</button>
+    <input type="number" min="0" max="${MAX}" step="2" aria-label="Score voor ${d.name} (0, 2, 4, 6, 8 of ${MAX})">`;
+  const inp = row.querySelector("input");
+  inp.addEventListener("change", () => {
+    if (inp.value === "") return;
+    if (!setScore(i, inp.value)) { message("Kies 0, 2, 4, 6, 8 of 10.", true); inp.value = isSet(target[i]) ? target[i] : ""; }
+    else message("");
+  });
+  row.querySelector(".info-btn").addEventListener("click", () => openInfo(i));
+  dimList.appendChild(row);
+  inputs[i] = inp; swatches[i] = row.querySelector(".swatch");
+});
+
+function syncUI() {
+  DIMS.forEach((d, i) => {
+    const v = target[i];
+    inputs[i].value = isSet(v) ? v : "";
+    swatches[i].style.background = isSet(v) ? scoreColor(v) : "";
+    axisGroups[i].setAttribute("aria-valuenow", isSet(v) ? v : 0);
+    axisGroups[i].setAttribute("aria-valuetext", isSet(v) ? String(v) : "nog niet ingevuld");
+    axisGroups[i].setAttribute("aria-label", `Score voor ${d.name}: ${isSet(v) ? v : "nog niet ingevuld"}`);
+    VALUES.forEach(s => { tickEls[i][s].style.fill = isSet(v) && s <= v ? scoreColor(s) : ""; });
+  });
+}
+
+/* ==========================================================
+   7. INFO-MODAL
+   ========================================================== */
+const dlg = document.getElementById("infoDlg");
+function openInfo(i) {
+  const d = DIMS[i];
+  document.getElementById("infoTitle").innerHTML = iconSvg(i, 36) + " ";
+  document.getElementById("infoTitle").append(d.name);
+  document.getElementById("infoTitle").style.cssText = "display:flex;align-items:center;gap:10px";
+  document.getElementById("infoText").textContent = d.text;
+  document.getElementById("infoRanges").innerHTML =
+    `<div class="range" style="border-color:${scoreColor(9)}"><strong>Score 8–10:</strong> ${d.hi}</div>
+     <div class="range" style="border-color:${scoreColor(5.5)}"><strong>Score 4–6:</strong> ${d.mid}</div>
+     <div class="range" style="border-color:${scoreColor(1)}"><strong>Score 0–2:</strong> ${d.lo}</div>`;
+  // Dimensies met een eigen pagina (bijv. Marian over lichaamsfuncties) spelen die af in het venster
+  const frame = document.getElementById("infoFrame");
+  dlg.classList.toggle("wide", !!d.page);
+  document.getElementById("infoText").hidden = !!d.page;
+  document.getElementById("infoRanges").hidden = !!d.page;
+  if (d.page) { frame.title = d.name; frame.src = d.page; frame.hidden = false; }
+  else { frame.hidden = true; frame.removeAttribute("src"); }
+  dlg.showModal();
+}
+dlg.addEventListener("close", () => { const f = document.getElementById("infoFrame"); f.removeAttribute("src"); f.hidden = true; });
+document.getElementById("closeDlg").addEventListener("click", () => dlg.close());
+dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+
+/* ==========================================================
+   8. OPSLAG IN localStorage
+   Alle profielen staan als JSON-array onder één sleutel. Lezen
+   met try/catch zodat kapotte data of geblokkeerde opslag de
+   app niet laat crashen.
+   ========================================================== */
+function loadAll() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    return Array.isArray(arr) ? arr.filter(p => p && Array.isArray(p.scores) && p.scores.length === N) : [];
+  } catch (e) { return []; }
+}
+function saveAll(arr) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); return true; }
+  catch (e) { message("Opslaan mislukt (localStorage niet beschikbaar).", true); return false; }
+}
+const pad = n => String(n).padStart(2, "0");
+function readable(d) { // "16-11-2026, 14:45:00"
+  return `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+function message(txt, isErr) {
+  const m = document.getElementById("msg"); m.textContent = txt; m.className = txt ? (isErr ? "err" : "ok") : "";
+}
+
+document.getElementById("saveBtn").addEventListener("click", () => {
+  const name = document.getElementById("name").value.trim();
+  if (!name) return message("Vul eerst een naam in.", true);
+  if (!target.every(valid)) return message("Geef alle 6 dimensies een score (0, 2, 4, 6, 8 of 10).", true);
+  const now = new Date();
+  const profile = { name, scores: [...target], timestamp: now.toISOString(), date: readable(now) };
+  const all = loadAll(); all.push(profile);
+  if (saveAll(all)) { message(`Profiel van ${name} opgeslagen.`); renderProfiles(); }
+});
+
+function renderProfiles() {
+  const ul = document.getElementById("profiles");
+  const all = loadAll();
+  ul.innerHTML = "";
+  if (!all.length) ul.innerHTML = `<li style="color:var(--muted)">Nog geen profielen opgeslagen.</li>`;
+  all.forEach((p, idx) => {
+    const li = document.createElement("li");
+    const info = document.createElement("div");
+    const strong = document.createElement("strong"); strong.textContent = p.name;   // textContent: voorkomt HTML-injectie
+    const meta = document.createElement("div"); meta.className = "p-meta";
+    meta.textContent = `${p.date} · [${p.scores.join(", ")}]`;
+    info.append(strong, meta);
+    const btns = document.createElement("div");
+    const load = document.createElement("button"); load.textContent = "Laden"; load.setAttribute("aria-label", `Laad profiel van ${p.name}, ${p.date}`);
+    load.addEventListener("click", () => loadProfile(p));
+    const del = document.createElement("button"); del.textContent = "Verwijderen"; del.className = "danger"; del.setAttribute("aria-label", `Verwijder profiel van ${p.name}, ${p.date}`);
+    del.addEventListener("click", () => {
+      if (!confirm(`Profiel van ${p.name} (${p.date}) verwijderen?`)) return;
+      const cur = loadAll(); cur.splice(idx, 1); saveAll(cur); renderProfiles();
+    });
+    btns.append(load, " ", del);
+    li.append(info, btns); ul.appendChild(li);
+  });
+  renderTrend();
+}
+
+function loadProfile(p) {
+  fade = null; polyOpacity = 1;
+  const now = performance.now();
+  p.scores.forEach((s, i) => {
+    const v = snap(Number(s) || 0);   // oudere profielen (1–10) worden afgerond op 0,2,…,10
+    from[i] = shown[i]; target[i] = v; startT[i] = now + i * 60;   // lichte vertraging per as
+  });
+  document.getElementById("name").value = p.name;
+  syncUI(); kick(); message(`Profiel van ${p.name} geladen.`);
+  renderTrend();
+}
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (!target.some(isSet)) return;
+  fade = { start: performance.now() };
+  message(""); kick();
+});
+
+/* ==========================================================
+   8b. EXPORT: PNG, PDF (via afdrukvenster) en JSON
+   PNG: de SVG wordt gekloond, de berekende CSS-stijlen worden
+   inline gezet (de SVG-afbeelding kent de paginastijlen niet), dan
+   als afbeelding op een <canvas> getekend en als bestand gedownload.
+   ========================================================== */
+function exportTitle() {
+  const n = document.getElementById("name").value.trim() || "Naamloos";
+  return { name: n, date: readable(new Date()) };
+}
+function download(url, filename) {
+  const a = document.createElement("a"); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+const safeName = s => s.replace(/[^\w\-]+/g, "_");
+
+document.getElementById("pngBtn").addEventListener("click", () => {
+  if (!target.some(isSet)) return message("Vul eerst scores in om te exporteren.", true);
+  const { name, date } = exportTitle();
+  const clone = svg.cloneNode(true);
+  const props = ["fill", "stroke", "stroke-width", "opacity", "font-size", "font-weight", "font-family", "display", "visibility", "paint-order"];
+  const src = svg.querySelectorAll("*"), dst = clone.querySelectorAll("*");
+  src.forEach((node, k) => {
+    const cs = getComputedStyle(node);
+    props.forEach(p => dst[k].style.setProperty(p, cs.getPropertyValue(p)));
+  });
+  clone.querySelectorAll(".info, .hit").forEach(n => n.remove());          // geen knoppen/klikzones in export
+  clone.setAttribute("xmlns", NS);
+  const vb = svg.viewBox.baseVal, scale = 2, head = 90, foot = 50;
+  const W = vb.width * scale, H = vb.height * scale + (head + foot) * scale / 2;
+  const bg = getComputedStyle(document.body).getPropertyValue("background-color");
+  const xml = new XMLSerializer().serializeToString(clone);
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const g = c.getContext("2d");
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    const txt = getComputedStyle(document.body).color;
+    g.fillStyle = txt; g.font = "bold 40px system-ui, sans-serif"; g.fillText(`Positive Health – ${name}`, 40, 60);
+    g.font = "26px system-ui, sans-serif"; g.fillText(date, 40, 100);
+    g.drawImage(img, 0, head, W, vb.height * scale);
+    g.font = "24px system-ui, sans-serif";
+    g.fillText("Scores: " + DIMS.map((d, i) => `${d.name} ${fmt(target[i])}`).join(" · "), 40, H - 18, W - 80);
+    c.toBlob(b => { download(URL.createObjectURL(b), `positive-health_${safeName(name)}.png`); message("PNG gedownload."); }, "image/png");
+  };
+  img.onerror = () => message("PNG-export mislukt in deze browser.", true);
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(xml);
+});
+
+document.getElementById("pdfBtn").addEventListener("click", () => {
+  if (!target.some(isSet)) return message("Vul eerst scores in om te exporteren.", true);
+  const { name, date } = exportTitle();
+  document.getElementById("printHead").textContent =
+    `Positive Health – ${name} (${date}) · ` + DIMS.map((d, i) => `${d.name}: ${fmt(target[i])}`).join(", ");
+  message("Kies in het printvenster 'Opslaan als PDF'.");
+  window.print();
+});
+
+document.getElementById("jsonBtn").addEventListener("click", () => {
+  const all = loadAll();
+  if (!all.length) return message("Er zijn nog geen opgeslagen profielen om te exporteren.", true);
+  const url = URL.createObjectURL(new Blob([JSON.stringify(all, null, 2)], { type: "application/json" }));
+  download(url, "positive-health-profielen.json"); message("JSON gedownload.");
+});
+
+/* ==========================================================
+   9. TRENDGRAFIEK (vanilla SVG, gemiddelde score per opgeslagen meting)
+   ========================================================== */
+function renderTrend() {
+  const t = document.getElementById("trend"); t.innerHTML = "";
+  const name = document.getElementById("name").value.trim().toLowerCase();
+  const info = document.getElementById("trendInfo");
+  const data = loadAll().filter(p => p.name.toLowerCase() === name).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  if (data.length < 2) { info.textContent = name ? "Sla minstens twee metingen op onder deze naam om een trend te zien." : "Vul een naam in; bij minstens twee opgeslagen metingen verschijnt hier de trend."; return; }
+  info.textContent = `${data.length} metingen van ${data[0].name}.`;
+  const W = 800, H = 240, L = 40, Rr = 20, T = 15, B = 40;
+  const xs = i => L + (i / (data.length - 1)) * (W - L - Rr), ys = v => T + (1 - v / MAX) * (H - T - B);
+  for (let v = 0; v <= MAX; v += 2) {
+    el("line", { x1: L, x2: W - Rr, y1: ys(v), y2: ys(v), stroke: "var(--ring)" }, t);
+    const tx = el("text", { x: L - 8, y: ys(v) + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11 }, t); tx.textContent = v;
+  }
+  const avgs = data.map(p => p.scores.reduce((a, b) => a + b, 0) / N);
+  el("polyline", { points: avgs.map((v, i) => `${xs(i)},${ys(v)}`).join(" "), fill: "none", stroke: "var(--poly-stroke)", "stroke-width": 3 }, t);
+  avgs.forEach((v, i) => {
+    el("circle", { cx: xs(i), cy: ys(v), r: 5, fill: scoreColor(v) }, t);
+    const lab = el("text", { x: xs(i), y: H - 18, "text-anchor": "middle", fill: "var(--muted)", "font-size": 10 }, t);
+    lab.textContent = data[i].date.split(",")[0];
+    const val = el("text", { x: xs(i), y: ys(v) - 10, "text-anchor": "middle", fill: "var(--text)", "font-size": 11, "font-weight": 700 }, t);
+    val.textContent = v.toFixed(1);
+  });
+}
+document.getElementById("name").addEventListener("input", renderTrend);
+
+/* ==========================================================
+   10. THEMA + SNELHEID
+   ========================================================== */
+const themeBtn = document.getElementById("themeBtn");
+function setTheme(dark) {
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  themeBtn.textContent = dark ? "☀️ Licht" : "🌙 Donker";
+  themeBtn.setAttribute("aria-pressed", dark);
+  try { localStorage.setItem("phTheme", dark ? "dark" : "light"); } catch (e) {}
+}
+let savedTheme = null; try { savedTheme = localStorage.getItem("phTheme"); } catch (e) {}
+setTheme(savedTheme ? savedTheme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches);
+themeBtn.addEventListener("click", () => setTheme(document.documentElement.dataset.theme !== "dark"));
+document.getElementById("speed").addEventListener("input", e => speed = Number(e.target.value));
+
+/* ===== Start ===== */
+syncUI(); draw(); renderProfiles();
+</script>
+</body>
+</html>
